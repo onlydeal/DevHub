@@ -87,7 +87,7 @@ const PostFeed: React.FC = () => {
   return (
     <div className="w-full max-w-4xl mx-auto space-y-6 py-6">
       {/* Create Post */}
-      <div className={`p-6 rounded-lg shadow-md ${isDark ? 'bg-gray-800' : 'bg-white'}`}>
+      <div className={`p-6 rounded-lg mt-4 shadow-md ${isDark ? 'bg-gray-800' : 'bg-white'}`}>
         {!showCreatePost ? (
           <button
             onClick={() => setShowCreatePost(true)}
