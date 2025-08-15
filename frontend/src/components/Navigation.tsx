@@ -26,7 +26,8 @@ const Navigation: React.FC = () => {
     { path: '/bookmarks', label: 'Bookmarks', icon: '🔖' },
     { path: '/chat', label: 'Chat', icon: '💬' },
     { path: '/analytics', label: 'Analytics', icon: '📊' },
-    { path: '/profile', label: 'Profile', icon: '👤' },
+    { path: '/update-profile', label: 'Update Profile', icon: '👤' },
+    { path: '/my-profile', label: 'My Profile', icon: '👤' },
   ];
 
   return (
