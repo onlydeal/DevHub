@@ -1,49 +1,3 @@
-// import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-// import axios from 'axios';
-// import { FeedState, Post } from '../types';
-
-// export const fetchFeed = createAsyncThunk('feed/fetchFeed', async (page: number) => {
-//   const res = await axios.get(`/api/posts/feed?page=${page}`);
-//   return res.data as { posts: Post[]; hasMore: boolean };
-// });
-
-// export const addCommentOptimistic = createAsyncThunk('feed/addComment', async ({ postId, text, parentId }: { postId: string; text: string; parentId?: string }, { dispatch }) => {
-//   const tempId = Date.now().toString();
-//   dispatch({
-//     type: 'feed/addCommentLocal',
-//     payload: { postId, text, parentId, tempId }
-//   });
-//   try {
-//     const res = await axios.post('/api/posts/comment', { postId, text, parentId }, {
-//       headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-//     });
-//     return res.data;
-//   } catch (err) {
-//     dispatch({
-//       type: 'feed/rollbackComment',
-//       payload: { postId, tempId }
-//     });
-//     throw err;
-//   }
-// });
-
-// const feedSlice = createSlice({
-//   name: 'feed',
-//   initialState: { posts: [], page: 1, hasMore: true } as FeedState,
-//   reducers: {},
-//   extraReducers: (builder) => {
-//     builder.addCase(fetchFeed.fulfilled, (state, action) => {
-//       state.posts = [...state.posts, ...action.payload.posts];
-//       state.hasMore = action.payload.hasMore;
-//       state.page += 1;
-//     });
-//   },
-// });
-
-// export default feedSlice.reducer;
-
-
-
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
 import { FeedState, Post, Comment } from '../types';
@@ -59,15 +13,76 @@ export const fetchFeed = createAsyncThunk('feed/fetchFeed', async (page: number,
   }
 });
 
+export const createPost = createAsyncThunk('feed/createPost', async ({ title, content, tags }: { title: string; content: string; tags: string[] }, { dispatch }) => {
+  try {
+    const res = await axios.post(
+      '/api/posts',
+      { title, content, tags },
+      {
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+      },
+    );
+    dispatch(addNotification('Post created successfully!'));
+    return res.data as Post;
+  } catch (err) {
+    dispatch(addNotification('Failed to create post'));
+    throw err;
+  }
+});
+
+export const updatePost = createAsyncThunk('feed/updatePost', async ({ id, title, content, tags }: { id: string; title: string; content: string; tags: string[] }, { dispatch }) => {
+  try {
+    const res = await axios.put(
+      `/api/posts/${id}`,
+      { title, content, tags },
+      {
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+      },
+    );
+    dispatch(addNotification('Post updated successfully!'));
+    return res.data as Post;
+  } catch (err) {
+    dispatch(addNotification('Failed to update post'));
+    throw err;
+  }
+});
+
+export const deletePost = createAsyncThunk('feed/deletePost', async (id: string, { dispatch }) => {
+  try {
+    await axios.delete(`/api/posts/${id}`, {
+      headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+    });
+    dispatch(addNotification('Post deleted successfully'));
+    return id;
+  } catch (err) {
+    dispatch(addNotification('Failed to delete post'));
+    throw err;
+  }
+});
+
+export const likePost = createAsyncThunk('feed/likePost', async (id: string, { dispatch }) => {
+  try {
+    const res = await axios.post(`/api/posts/${id}/like`, {}, {
+      headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+    });
+    return { id, ...res.data };
+  } catch (err) {
+    dispatch(addNotification('Failed to like post'));
+    throw err;
+  }
+});
+
 export const addCommentOptimistic = createAsyncThunk(
   'feed/addComment',
   async ({ postId, text, parentId }: { postId: string; text: string; parentId?: string }, { dispatch, getState }) => {
-    const state = getState() as { auth: { user: { id: string } } };
+    const state = getState() as { auth: { user: { id: string; name: string } } };
     const tempId = Date.now().toString();
+    
     dispatch({
       type: 'feed/addCommentLocal',
-      payload: { postId, text, parentId, tempId, user: state.auth.user.id },
+      payload: { postId, text, parentId, tempId, user: state.auth.user },
     });
+    
     try {
       const res = await axios.post(
         '/api/posts/comment',
@@ -88,22 +103,6 @@ export const addCommentOptimistic = createAsyncThunk(
   },
 );
 
-export const createPost = createAsyncThunk('feed/createPost', async ({ title, content, tags }: { title: string; content: string; tags: string[] }, { dispatch }) => {
-  try {
-    const res = await axios.post(
-      '/api/posts',
-      { title, content, tags },
-      {
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
-      },
-    );
-    return res.data as Post;
-  } catch (err) {
-    dispatch(addNotification('Failed to create post'));
-    throw err;
-  }
-});
-
 const feedSlice = createSlice({
   name: 'feed',
   initialState: { posts: [], page: 1, hasMore: true } as FeedState,
@@ -112,7 +111,15 @@ const feedSlice = createSlice({
       const { postId, text, parentId, tempId, user } = action.payload;
       const post = state.posts.find((p) => p._id === postId);
       if (post) {
-        const newComment: Comment = { _id: tempId, text, user, replies: [] };
+        const newComment: Comment = { 
+          _id: tempId, 
+          text, 
+          user: user.id,
+          userName: user.name,
+          replies: [],
+          createdAt: new Date().toISOString()
+        };
+        
         if (parentId) {
           const addReply = (comments: Comment[]): boolean => {
             for (let c of comments) {
@@ -147,20 +154,49 @@ const feedSlice = createSlice({
         removeComment(post.comments);
       }
     },
+    resetFeed: (state) => {
+      state.posts = [];
+      state.page = 1;
+      state.hasMore = true;
+    }
   },
   extraReducers: (builder) => {
     builder.addCase(fetchFeed.fulfilled, (state, action) => {
-      state.posts = [...state.posts, ...action.payload.posts];
+      if (action.meta.arg === 1) {
+        // First page - replace posts
+        state.posts = action.payload.posts;
+        state.page = 2;
+      } else {
+        // Subsequent pages - append posts
+        state.posts = [...state.posts, ...action.payload.posts];
+        state.page += 1;
+      }
       state.hasMore = action.payload.hasMore;
-      state.page += 1;
     });
+    
     builder.addCase(createPost.fulfilled, (state, action) => {
       state.posts.unshift(action.payload);
     });
-    builder.addCase(addCommentOptimistic.fulfilled, (state, action) => {
-      // Update with real data if needed
+    
+    builder.addCase(updatePost.fulfilled, (state, action) => {
+      const index = state.posts.findIndex(p => p._id === action.payload._id);
+      if (index !== -1) {
+        state.posts[index] = action.payload;
+      }
+    });
+    
+    builder.addCase(deletePost.fulfilled, (state, action) => {
+      state.posts = state.posts.filter(p => p._id !== action.payload);
+    });
+    
+    builder.addCase(likePost.fulfilled, (state, action) => {
+      const post = state.posts.find(p => p._id === action.payload.id);
+      if (post) {
+        post.likes = action.payload.likes || [];
+      }
     });
   },
 });
 
+export const { resetFeed } = feedSlice.actions;
 export default feedSlice.reducer;

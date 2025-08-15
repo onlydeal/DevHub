@@ -8,6 +8,9 @@ interface IUser extends Document {
   role: string;
   skills: string[];
   bio: string;
+  profileStep: number;
+  isOnline: boolean;
+  lastSeen: Date;
   matchPassword(password: string): Promise<boolean>;
 }
 
@@ -18,6 +21,9 @@ const userSchema = new Schema<IUser>({
   role: { type: String, enum: ['user', 'admin'], default: 'user' },
   skills: [{ type: String }], // Added for profile
   bio: { type: String }, // Added for profile
+  profileStep: { type: Number, default: 0 }, // For multi-step wizard
+  isOnline: { type: Boolean, default: false },
+  lastSeen: { type: Date, default: Date.now },
 }, { timestamps: true });
 
 userSchema.pre('save', async function (next) {

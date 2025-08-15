@@ -12,9 +12,12 @@ interface IComment {
 interface IPost extends Document {
   title: string;
   content: string;
+  rawContent: string;
   user: mongoose.Types.ObjectId;
   tags: string[];
   comments: IComment[];
+  likes: string[];
+  views: number;
 }
 
 const commentSchema = new Schema<IComment>({
@@ -26,9 +29,12 @@ const commentSchema = new Schema<IComment>({
 const postSchema = new Schema<IPost>({
   title: { type: String, required: true },
   content: { type: String, required: true },
+  rawContent: { type: String, required: true },
   user: { type: Schema.Types.ObjectId, ref: 'User' },
   tags: [String],
-  comments: [commentSchema]
+  comments: [commentSchema],
+  likes: [{ type: String }],
+  views: { type: Number, default: 0 }
 }, { timestamps: true });
 
 postSchema.index({ content: 'text', title: 'text' });

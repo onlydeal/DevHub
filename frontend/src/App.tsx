@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Navigation from './components/Navigation';
 import AuthForm from './components/AuthForm';
@@ -6,33 +6,50 @@ import ProfileWizard from './components/ProfileWizard';
 import PostFeed from './components/PostFeed';
 import BookmarkList from './components/BookmarkList';
 import ChatRoom from './components/ChatRoom';
+import Analytics from './components/Analytics';
 import NotificationToast from './components/NotificationToast';
 import PrivateRoute from './components/PrivateRoute';
-import { useSelector } from 'react-redux';
-import { RootState } from './store';
+import { useSelector, useDispatch } from 'react-redux';
+import { RootState, AppDispatch } from './store';
+import { setTheme } from './slices/themeSlice';
 
 const App: React.FC = () => {
   const isAuthenticated = useSelector((state: RootState) => state.auth.isAuthenticated);
+  const { isDark } = useSelector((state: RootState) => state.theme);
+  const dispatch = useDispatch<AppDispatch>();
+
+  useEffect(() => {
+    // Initialize theme
+    const savedTheme = localStorage.getItem('theme');
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const shouldBeDark = savedTheme === 'dark' || (!savedTheme && prefersDark);
+    
+    dispatch(setTheme(shouldBeDark));
+    document.documentElement.classList.toggle('dark', shouldBeDark);
+  }, [dispatch]);
 
   return (
-    <Router>
-      <NotificationToast />
-      <div className="min-h-screen bg-gray-50">
-        {isAuthenticated && <Navigation />}
-        <div className={`${isAuthenticated ? 'pt-16' : ''} min-h-screen flex flex-col items-center justify-center p-4 md:p-8`}>
-        <Routes>
-          <Route path="/login" element={<AuthForm />} />
-          <Route path="/signup" element={<AuthForm isSignup />} />
-          <Route element={<PrivateRoute />}>
-            <Route path="/profile" element={<ProfileWizard />} />
-            <Route path="/" element={<PostFeed />} />
-            <Route path="/bookmarks" element={<BookmarkList />} />
-            <Route path="/chat" element={<ChatRoom />} />
-          </Route>
-        </Routes>
+    <div className={isDark ? 'dark' : ''}>
+      <Router>
+        <NotificationToast />
+        <div className={`min-h-screen transition-colors ${isDark ? 'bg-gray-900' : 'bg-gray-50'}`}>
+          {isAuthenticated && <Navigation />}
+          <div className={`${isAuthenticated ? 'pt-16' : ''} min-h-screen flex flex-col items-center justify-center p-4 md:p-8`}>
+            <Routes>
+              <Route path="/login" element={<AuthForm />} />
+              <Route path="/signup" element={<AuthForm isSignup />} />
+              <Route element={<PrivateRoute />}>
+                <Route path="/profile" element={<ProfileWizard />} />
+                <Route path="/" element={<PostFeed />} />
+                <Route path="/bookmarks" element={<BookmarkList />} />
+                <Route path="/chat" element={<ChatRoom />} />
+                <Route path="/analytics" element={<Analytics />} />
+              </Route>
+            </Routes>
+          </div>
         </div>
-      </div>
-    </Router>
+      </Router>
+    </div>
   );
 };
 
