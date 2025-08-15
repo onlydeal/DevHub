@@ -3,7 +3,7 @@ import 'dotenv/config';
 import express, { Express } from 'express';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
-import { createClient } from 'redis';
+import cors from 'cors';
 import connectDB from './config/db';
 import authRoutes from './routes/auth';
 import postRoutes from './routes/posts';
@@ -13,25 +13,21 @@ import analyticsRoutes from './routes/analytics';
 import rateLimit from './middleware/rateLimitMiddleware';
 import checkBlocked from './middleware/securityMiddleware';
 import cookieParser from 'cookie-parser';
+import { redisClient } from './config/redis';
 
 const app: Express = express();
 const server = createServer(app);
-const io = new Server(server, { cors: { origin: '*' } });
-const redisClient = createClient({ 
-    url: process.env.REDIS_URI,
-    socket: {
-        tls:true,
-        rejectUnauthorized:false
-    }
- });
-redisClient.on('error', (err) => {
-  console.error('Redis Client Error', err);
+const io = new Server(server, { 
+  cors: { 
+    origin: process.env.NODE_ENV === 'production' ? process.env.FRONTEND_URL : 'http://localhost:5173',
+    credentials: true 
+  } 
 });
-redisClient.on('connect',()=>{
-    console.log('Redis connected')
-})
-redisClient.connect();
 
+app.use(cors({
+  origin: process.env.NODE_ENV === 'production' ? process.env.FRONTEND_URL : 'http://localhost:5173',
+  credentials: true
+}));
 app.use(cookieParser());
 app.use(express.json());
 app.use(checkBlocked);
