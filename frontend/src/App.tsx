@@ -12,6 +12,7 @@ import PrivateRoute from './components/PrivateRoute';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState, AppDispatch } from './store';
 import { setTheme } from './slices/themeSlice';
+import PublicRoute from './components/PublicRoute';
 
 const App: React.FC = () => {
   const isAuthenticated = useSelector((state: RootState) => state.auth.isAuthenticated);
@@ -36,8 +37,10 @@ const App: React.FC = () => {
           {isAuthenticated && <Navigation />}
           <div className={`${isAuthenticated ? 'pt-16' : ''} min-h-screen flex flex-col items-center justify-center p-4 md:p-8`}>
             <Routes>
-              <Route path="/login" element={<AuthForm />} />
-              <Route path="/signup" element={<AuthForm isSignup />} />
+                <Route element={<PublicRoute />}>
+                <Route path="/login" element={<AuthForm />} />
+                <Route path="/signup" element={<AuthForm isSignup />} />
+                </Route>
               <Route element={<PrivateRoute />}>
                 <Route path="/profile" element={<ProfileWizard />} />
                 <Route path="/" element={<PostFeed />} />

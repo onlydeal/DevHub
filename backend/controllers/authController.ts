@@ -180,7 +180,7 @@ export const resetPassword = async (req: Request, res: Response): Promise<void> 
     // Store reset token in Redis with 10 minute expiration
     await redisClient.setEx(`reset_token:${resetTokenHash}`, 600, user._id.toString());
     
-    const transporter = nodemailer.createTransporter({
+    const transporter = nodemailer.createTransport({
       host: process.env.SMTP_HOST,
       port: 587,
       secure: false,

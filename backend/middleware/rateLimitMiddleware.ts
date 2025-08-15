@@ -48,4 +48,4 @@ export const standardRateLimit = createRateLimit(15 * 60 * 1000, 100);
 export const strictRateLimit = createRateLimit(15 * 60 * 1000, 10);
 
 // Auth rate limit: 5 requests per 15 minutes
-export const authRateLimit = createRateLimit(15 * 60 * 1000, 5);
+export const authRateLimit = createRateLimit(15 * 60 * 1000, 100);

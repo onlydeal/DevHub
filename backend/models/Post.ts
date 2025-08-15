@@ -18,6 +18,8 @@ interface IPost extends Document {
   comments: IComment[];
   likes: string[];
   views: number;
+  createdAt: Date;  
+  updatedAt: Date;
 }
 
 const commentSchema = new Schema<IComment>({

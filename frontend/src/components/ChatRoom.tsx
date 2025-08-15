@@ -123,7 +123,7 @@ const ChatRoom: React.FC = () => {
   const isOwnMessage = (msg: Message) => msg.userId === user?.id;
 
   return (
-    <div className="w-full max-w-4xl mx-auto h-[600px] flex flex-col">
+    <div className="w-full max-w-4xl mx-auto h-[600px] flex flex-col pt-8">
       {/* Chat Header */}
       <div className={`p-4 border-b ${isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} rounded-t-lg shadow-sm`}>
         <div className="flex items-center justify-between">

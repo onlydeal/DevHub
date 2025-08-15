@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import { Request, Response } from "express";
 import Post from "../models/Post";
 import Activity from "../models/Activity";
@@ -211,7 +212,7 @@ export const addComment = async (req: AuthRequest, res: Response): Promise<void>
 
     const comment = {
       text,
-      user: userId,
+      user: new mongoose.Types.ObjectId(userId),
       replies: [],
       createdAt: new Date(),
       updatedAt: new Date()
