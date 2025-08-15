@@ -13,6 +13,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { RootState, AppDispatch } from './store';
 import { setTheme } from './slices/themeSlice';
 import PublicRoute from './components/PublicRoute';
+import ProfilePage from './components/ProfilePage';
 
 const App: React.FC = () => {
   const isAuthenticated = useSelector((state: RootState) => state.auth.isAuthenticated);
@@ -42,11 +43,12 @@ const App: React.FC = () => {
                 <Route path="/signup" element={<AuthForm isSignup />} />
                 </Route>
               <Route element={<PrivateRoute />}>
-                <Route path="/profile" element={<ProfileWizard />} />
+                <Route path="/update-profile" element={<ProfileWizard />} />
                 <Route path="/" element={<PostFeed />} />
                 <Route path="/bookmarks" element={<BookmarkList />} />
                 <Route path="/chat" element={<ChatRoom />} />
                 <Route path="/analytics" element={<Analytics />} />
+                <Route path="/my-profile" element={<ProfilePage />} />
               </Route>
             </Routes>
           </div>
