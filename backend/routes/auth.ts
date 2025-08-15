@@ -1,33 +1,25 @@
-// // backend/routes/auth.ts
-// import { Router } from 'express';
-// import { signup, login, refreshToken, resetPassword, updatePassword } from '../controllers/authController';
-// import sanitizeInput from '../middleware/sanitizeMiddleware';
-
-// const router = Router();
-
-// router.post('/signup', sanitizeInput, signup);
-// router.post('/login', sanitizeInput, login);
-// router.post('/refresh', refreshToken);
-// router.post('/reset', sanitizeInput, resetPassword);
-// router.post('/update-password', sanitizeInput, updatePassword);
-
-// export default router;
-
-
-
-
 import express from 'express';
-import { signup, login, refresh, resetPassword, updatePassword, updateProfile } from '../controllers/authController';
+import { 
+  signup, 
+  login, 
+  refresh, 
+  logout,
+  resetPassword, 
+  confirmResetPassword,
+  updateProfile 
+} from '../controllers/authController';
 import authMiddleware from '../middleware/authMiddleware';
 import sanitizeInput from '../middleware/sanitizeMiddleware';
+import { authRateLimit, strictRateLimit } from '../middleware/rateLimitMiddleware';
 
 const router = express.Router();
 
-router.post('/signup', sanitizeInput, signup);
-router.post('/login', sanitizeInput, login);
+router.post('/signup', authRateLimit, sanitizeInput, signup);
+router.post('/login', authRateLimit, sanitizeInput, login);
 router.post('/refresh', refresh);
-router.post('/reset', sanitizeInput, resetPassword);
-router.post('/update-password', authMiddleware, sanitizeInput, updatePassword);
-router.put('/profile', authMiddleware, sanitizeInput, updateProfile); // New route
+router.post('/logout', authMiddleware, logout);
+router.post('/reset-password', strictRateLimit, sanitizeInput, resetPassword);
+router.post('/confirm-reset-password', strictRateLimit, sanitizeInput, confirmResetPassword);
+router.put('/profile', authMiddleware, sanitizeInput, updateProfile);
 
 export default router;

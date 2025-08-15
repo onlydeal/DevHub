@@ -3,6 +3,7 @@ import authReducer from './slices/authSlice';
 import feedReducer from './slices/feedSlice';
 import cacheReducer from './slices/cacheSlice';
 import notificationReducer from './slices/notificationSlice';
+import themeReducer from './slices/themeSlice';
 
 const store = configureStore({
   reducer: {
@@ -10,6 +11,7 @@ const store = configureStore({
     feed: feedReducer,
     cache: cacheReducer,
     notifications: notificationReducer,
+    theme: themeReducer,
   },
 });
 
