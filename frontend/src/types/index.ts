@@ -5,6 +5,7 @@ export interface User {
   role: string;
   skills?: string[];
   bio?: string;
+  exp?: number; // JWT expiration
 }
 
 export interface Post {
