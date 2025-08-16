@@ -20,6 +20,7 @@ const Navigation: React.FC = () => {
   };
 
   if (!isAuthenticated) return null;
+  console.log(user)
 
   const navItems = [
     { path: '/', label: 'Feed', icon: '🏠' },
