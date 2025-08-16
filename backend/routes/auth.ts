@@ -6,7 +6,8 @@ import {
   logout,
   resetPassword, 
   confirmResetPassword,
-  updateProfile 
+  updateProfile,
+  getProfile
 } from '../controllers/authController';
 import authMiddleware from '../middleware/authMiddleware';
 import sanitizeInput from '../middleware/sanitizeMiddleware';
@@ -21,5 +22,6 @@ router.post('/logout', authMiddleware, logout);
 router.post('/reset-password', strictRateLimit, sanitizeInput, resetPassword);
 router.post('/confirm-reset-password', strictRateLimit, sanitizeInput, confirmResetPassword);
 router.put('/profile', authMiddleware, sanitizeInput, updateProfile);
+router.get('/profile', authMiddleware, getProfile);
 
 export default router;

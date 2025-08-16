@@ -9,6 +9,8 @@ import postRoutes from './routes/posts';
 import resourceRoutes from './routes/resources';
 import bookmarkRoutes from './routes/bookmarks';
 import analyticsRoutes from './routes/analytics';
+import userRoutes from './routes/users';
+import chatRoutes from './routes/chat';
 import { standardRateLimit } from './middleware/rateLimitMiddleware';
 import { checkBlocked, detectSuspiciousActivity } from './middleware/securityMiddleware';
 import cookieParser from 'cookie-parser';
@@ -47,6 +49,8 @@ app.use('/api/posts', postRoutes);
 app.use('/api/resources', resourceRoutes);
 app.use('/api/bookmarks', bookmarkRoutes);
 app.use('/api/analytics', analyticsRoutes);
+app.use('/api/users', userRoutes);
+app.use('/api/chat', chatRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {
@@ -79,6 +83,49 @@ io.on('connection', (socket) => {
     } catch (error) {
       console.error('Error updating user status:', error);
     }
+  });
+  
+  socket.on('join_private_chat', (userId) => {
+    socket.join(`user_${userId}`);
+  });
+  
+  socket.on('private_message', async (data) => {
+    const { senderId, senderName, recipientId, message } = data;
+    
+    const chatMessage = {
+      _id: Date.now().toString(),
+      sender: senderId,
+      senderName,
+      recipient: recipientId,
+      message,
+      timestamp: new Date().toISOString(),
+      read: false
+    };
+    
+    try {
+      // Create chat ID (consistent ordering)
+      const chatId = [senderId, recipientId].sort().join('_');
+      
+      // Store message in Redis
+      await redisClient.lPush(`chat_messages:${chatId}`, JSON.stringify(chatMessage));
+      await redisClient.lTrim(`chat_messages:${chatId}`, 0, 999); // Keep last 1000 messages
+      
+      // Send to both users
+      io.to(`user_${senderId}`).emit('private_message', chatMessage);
+      io.to(`user_${recipientId}`).emit('private_message', chatMessage);
+    } catch (error) {
+      console.error('Error storing private message:', error);
+    }
+  });
+  
+  socket.on('typing_private', (data) => {
+    const { userId, userName, chatId } = data;
+    socket.broadcast.emit('user_typing_private', { userId, userName, chatId });
+  });
+  
+  socket.on('stop_typing_private', (data) => {
+    const { userId, userName, chatId } = data;
+    socket.broadcast.emit('user_stop_typing_private', { userId, userName, chatId });
   });
   
   socket.on('chat_message', async (data) => {

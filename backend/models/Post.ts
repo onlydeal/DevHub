@@ -16,8 +16,6 @@ interface IPost extends Document {
   user: mongoose.Types.ObjectId;
   tags: string[];
   comments: IComment[];
-  likes: string[];
-  views: number;
   createdAt: Date;  
   updatedAt: Date;
 }
@@ -35,8 +33,6 @@ const postSchema = new Schema<IPost>({
   user: { type: Schema.Types.ObjectId, ref: 'User' },
   tags: [String],
   comments: [commentSchema],
-  likes: [{ type: String }],
-  views: { type: Number, default: 0 }
 }, { timestamps: true });
 
 postSchema.index({ content: 'text', title: 'text' });

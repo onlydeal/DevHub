@@ -180,7 +180,7 @@ export const resetPassword = async (req: Request, res: Response): Promise<void> 
     // Store reset token in Redis with 10 minute expiration
     await redisClient.setEx(`reset_token:${resetTokenHash}`, 600, user._id.toString());
     
-    const transporter = nodemailer.createTransport({
+    const transporter = nodemailer.createTransporter({
       host: process.env.SMTP_HOST,
       port: 587,
       secure: false,
@@ -242,7 +242,7 @@ export const confirmResetPassword = async (req: Request, res: Response): Promise
 };
 
 export const updateProfile = async (req: AuthRequest, res: Response): Promise<void> => {
-  const { name, skills, bio, profileStep } = req.body;
+  const { name, skills, bio, profileStep, github, linkedin, website } = req.body;
   try {
     const user = await User.findById(req.user?.id);
     if (!user) {
@@ -251,9 +251,12 @@ export const updateProfile = async (req: AuthRequest, res: Response): Promise<vo
     }
     
     if (name) user.name = name;
-    if (skills) user.skills = skills.split(',').map((s: string) => s.trim());
+    if (skills) user.skills = Array.isArray(skills) ? skills : skills.split(',').map((s: string) => s.trim());
     if (bio) user.bio = bio;
     if (profileStep !== undefined) user.profileStep = profileStep;
+    if (github) user.github = github;
+    if (linkedin) user.linkedin = linkedin;
+    if (website) user.website = website;
     
     await user.save();
     
@@ -266,9 +269,27 @@ export const updateProfile = async (req: AuthRequest, res: Response): Promise<vo
         role: user.role,
         skills: user.skills,
         bio: user.bio,
-        profileStep: user.profileStep
+        profileStep: user.profileStep,
+        github: user.github,
+        linkedin: user.linkedin,
+        website: user.website
       }
     });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ msg: 'Server error' });
+  }
+};
+
+export const getProfile = async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const user = await User.findById(req.user?.id).select('-password');
+    if (!user) {
+      res.status(404).json({ msg: 'User not found' });
+      return;
+    }
+    
+    res.json({ user });
   } catch (err) {
     console.error(err);
     res.status(500).json({ msg: 'Server error' });

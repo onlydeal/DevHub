@@ -29,8 +29,6 @@ export const getAnalytics = async (req: AuthRequest, res: Response): Promise<voi
         $group: {
           _id: null,
           totalPosts: { $sum: 1 },
-          totalViews: { $sum: '$views' },
-          totalLikes: { $sum: { $size: '$likes' } },
           totalComments: { $sum: { $size: '$comments' } }
         }
       }
@@ -43,17 +41,22 @@ export const getAnalytics = async (req: AuthRequest, res: Response): Promise<voi
       .populate('target');
 
     // Top posts by engagement
-    const topPosts = await Post.find({ user: userId })
-      .sort({ views: -1, likes: -1 })
+    const topPosts = await Post.aggregate([
+      { $match: { user: userId } },
+      {
+        $addFields: {
+          commentCount: { $size: '$comments' }
+        }
+      },
+      { $sort: { commentCount: -1, createdAt: -1 } },
       .limit(5)
-      .select('title views likes comments');
+      .select('title comments');
+    ]);
 
     res.json({
       activities: userActivities,
       postStats: postStats[0] || {
         totalPosts: 0,
-        totalViews: 0,
-        totalLikes: 0,
         totalComments: 0
       },
       recentActivity,

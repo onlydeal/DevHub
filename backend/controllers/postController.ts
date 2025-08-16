@@ -110,44 +110,6 @@ export const deletePost = async (req: AuthRequest, res: Response): Promise<void>
   }
 };
 
-export const likePost = async (req: AuthRequest, res: Response): Promise<void> => {
-  const { id } = req.params;
-  
-  try {
-    const userId = req.user?.id;
-    if (!userId) {
-      res.status(401).json({ msg: "Unauthorized" });
-      return;
-    }
-    
-    const post = await Post.findById(id);
-    if (!post) {
-      res.status(404).json({ msg: "Post not found" });
-      return;
-    }
-    
-    const likeIndex = post.likes.indexOf(userId);
-    if (likeIndex > -1) {
-      post.likes.splice(likeIndex, 1);
-    } else {
-      post.likes.push(userId);
-    }
-    
-    await post.save();
-    
-    await new Activity({
-      user: userId,
-      action: likeIndex > -1 ? "unlike_post" : "like_post",
-      target: post._id.toString(),
-    }).save();
-    
-    res.json({ likes: post.likes.length, isLiked: likeIndex === -1 });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ msg: "Server error" });
-  }
-};
-
 export const getFeed = async (req: Request, res: Response): Promise<void> => {
   const { page = "1", limit = "10", sort = "createdAt" } = req.query;
   try {
@@ -292,6 +254,21 @@ export const getPost = async (req: Request, res: Response): Promise<void> => {
     }
     
     res.json(post);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ msg: "Server error" });
+  }
+};
+
+export const getUserPosts = async (req: AuthRequest, res: Response): Promise<void> => {
+  const { userId } = req.params;
+  
+  try {
+    const posts = await Post.find({ user: userId })
+      .populate('user', 'name email')
+      .sort({ createdAt: -1 });
+      
+    res.json(posts);
   } catch (err) {
     console.error(err);
     res.status(500).json({ msg: "Server error" });

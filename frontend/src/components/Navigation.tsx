@@ -16,18 +16,17 @@ const Navigation: React.FC = () => {
 
   const handleLogout = () => {
     dispatch(logout());
-    navigate('/login');
+    navigate('/');
   };
 
   if (!isAuthenticated) return null;
   console.log(user)
 
   const navItems = [
-    { path: '/', label: 'Feed', icon: '🏠' },
+    { path: '/feed', label: 'Feed', icon: '🏠' },
     { path: '/bookmarks', label: 'Bookmarks', icon: '🔖' },
     { path: '/chat', label: 'Chat', icon: '💬' },
     { path: '/analytics', label: 'Analytics', icon: '📊' },
-    { path: '/update-profile', label: 'Update Profile', icon: '👤' },
     { path: '/my-profile', label: 'My Profile', icon: '👤' },
   ];
 
@@ -37,7 +36,7 @@ const Navigation: React.FC = () => {
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <div className="flex items-center">
-            <Link to="/" className={`text-xl font-bold ${isDark ? 'text-blue-400' : 'text-blue-600'} hover:text-blue-500 transition-colors`}>
+            <Link to="/feed" className={`text-xl font-bold ${isDark ? 'text-blue-400' : 'text-blue-600'} hover:text-blue-500 transition-colors`}>
               DevHub
             </Link>
           </div>

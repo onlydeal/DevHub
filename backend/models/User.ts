@@ -11,6 +11,9 @@ interface IUser extends Document {
   profileStep: number;
   isOnline: boolean;
   lastSeen: Date;
+  github?: string;
+  linkedin?: string;
+  website?: string;
   matchPassword(password: string): Promise<boolean>;
 }
 
@@ -24,6 +27,9 @@ const userSchema = new Schema<IUser>({
   profileStep: { type: Number, default: 0 }, // For multi-step wizard
   isOnline: { type: Boolean, default: false },
   lastSeen: { type: Date, default: Date.now },
+  github: { type: String },
+  linkedin: { type: String },
+  website: { type: String },
 }, { timestamps: true });
 
 userSchema.pre('save', async function (next) {

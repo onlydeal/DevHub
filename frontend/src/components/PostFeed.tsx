@@ -358,9 +358,9 @@ import React, { useEffect, useState } from 'react';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState, AppDispatch } from '../store';
-import { fetchFeed, createPost, addCommentOptimistic, likePost, deletePost, updatePost } from '../slices/feedSlice';
+import { fetchFeed, createPost, addCommentOptimistic, deletePost, updatePost } from '../slices/feedSlice';
 import { useForm, SubmitHandler } from 'react-hook-form';
-import CommentThread from './CommentThread';
+import ImprovedCommentThread from './ImprovedCommentThread';
 import ReactMarkdown from 'react-markdown';
 
 interface PostFormData {
@@ -433,13 +433,6 @@ const PostFeed: React.FC = () => {
     }
   };
 
-  const handleLike = async (postId: string) => {
-    try {
-      await dispatch(likePost(postId)).unwrap();
-    } catch (err) {
-      console.error(err);
-    }
-  };
 
   const handleDelete = async (postId: string) => {
     if (window.confirm('Are you sure you want to delete this post?')) {
@@ -719,31 +712,17 @@ const PostFeed: React.FC = () => {
             )}
 
             {/* Post Stats */}
-            <div className={`flex items-center space-x-6 py-3 border-t border-b ${
+            <div className={`flex items-center space-x-6 py-3 border-t ${
               isDark ? 'border-gray-700' : 'border-gray-200'
             }`}>
-              <button
-                onClick={() => handleLike(post._id)}
-                className={`flex items-center space-x-2 text-sm transition-colors ${
-                  post.likes?.includes(user?.id || '')
-                    ? 'text-red-500 hover:text-red-600'
-                    : isDark
-                      ? 'text-gray-400 hover:text-red-400'
-                      : 'text-gray-600 hover:text-red-500'
-                }`}
-              >
-                <span>{post.likes?.includes(user?.id || '') ? '❤️' : '🤍'}</span>
-                <span>{post.likes?.length || 0} likes</span>
-              </button>
-              
               <div className={`flex items-center space-x-2 text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
                 <span>💬</span>
                 <span>{post.comments?.length || 0} comments</span>
               </div>
               
               <div className={`flex items-center space-x-2 text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                <span>👁️</span>
-                <span>{post.views || 0} views</span>
+                <span>📅</span>
+                <span>{formatDate(post.createdAt)}</span>
               </div>
             </div>
             
@@ -773,7 +752,7 @@ const PostFeed: React.FC = () => {
               
               <div className="space-y-3">
                 {post.comments?.map((comment) => (
-                  <CommentThread
+                  <ImprovedCommentThread
                     key={comment._id}
                     comment={comment}
                     postId={post._id}

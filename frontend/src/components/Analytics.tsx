@@ -7,8 +7,6 @@ interface AnalyticsData {
   activities: Array<{ _id: string; count: number }>;
   postStats: {
     totalPosts: number;
-    totalViews: number;
-    totalLikes: number;
     totalComments: number;
   };
   recentActivity: Array<{
@@ -20,8 +18,6 @@ interface AnalyticsData {
   topPosts: Array<{
     _id: string;
     title: string;
-    views: number;
-    likes: string[];
     comments: any[];
   }>;
 }
@@ -96,7 +92,7 @@ const Analytics: React.FC = () => {
       </div>
 
       {/* Stats Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <div className={`p-6 rounded-lg shadow-md ${isDark ? 'bg-gray-800' : 'bg-white'}`}>
           <div className="flex items-center">
             <div className="p-3 rounded-full bg-blue-100 text-blue-600">
@@ -113,37 +109,6 @@ const Analytics: React.FC = () => {
           </div>
         </div>
 
-        <div className={`p-6 rounded-lg shadow-md ${isDark ? 'bg-gray-800' : 'bg-white'}`}>
-          <div className="flex items-center">
-            <div className="p-3 rounded-full bg-green-100 text-green-600">
-              👁️
-            </div>
-            <div className="ml-4">
-              <p className={`text-sm font-medium ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                Total Views
-              </p>
-              <p className={`text-2xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                {analytics.postStats.totalViews}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <div className={`p-6 rounded-lg shadow-md ${isDark ? 'bg-gray-800' : 'bg-white'}`}>
-          <div className="flex items-center">
-            <div className="p-3 rounded-full bg-red-100 text-red-600">
-              ❤️
-            </div>
-            <div className="ml-4">
-              <p className={`text-sm font-medium ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                Total Likes
-              </p>
-              <p className={`text-2xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                {analytics.postStats.totalLikes}
-              </p>
-            </div>
-          </div>
-        </div>
 
         <div className={`p-6 rounded-lg shadow-md ${isDark ? 'bg-gray-800' : 'bg-white'}`}>
           <div className="flex items-center">
@@ -199,8 +164,6 @@ const Analytics: React.FC = () => {
                       {post.title}
                     </h4>
                     <div className={`flex items-center space-x-4 mt-1 text-xs ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                      <span>👁️ {post.views}</span>
-                      <span>❤️ {post.likes?.length || 0}</span>
                       <span>💬 {post.comments?.length || 0}</span>
                     </div>
                   </div>

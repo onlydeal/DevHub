@@ -2,10 +2,10 @@ import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Navigation from './components/Navigation';
 import AuthForm from './components/AuthForm';
-import ProfileWizard from './components/ProfileWizard';
+import ImprovedProfileWizard from './components/ImprovedProfileWizard';
 import PostFeed from './components/PostFeed';
 import BookmarkList from './components/BookmarkList';
-import ChatRoom from './components/ChatRoom';
+import PrivateChatRoom from './components/PrivateChatRoom';
 import Analytics from './components/Analytics';
 import NotificationToast from './components/NotificationToast';
 import PrivateRoute from './components/PrivateRoute';
@@ -13,7 +13,8 @@ import { useSelector, useDispatch } from 'react-redux';
 import { RootState, AppDispatch } from './store';
 import { setTheme } from './slices/themeSlice';
 import PublicRoute from './components/PublicRoute';
-import ProfilePage from './components/ProfilePage';
+import ImprovedProfilePage from './components/ImprovedProfilePage';
+import LandingPage from './components/LandingPage';
 
 const App: React.FC = () => {
   const isAuthenticated = useSelector((state: RootState) => state.auth.isAuthenticated);
@@ -39,16 +40,17 @@ const App: React.FC = () => {
           <div className={`${isAuthenticated ? 'pt-16' : ''} min-h-screen flex flex-col items-center justify-center p-4 md:p-8`}>
             <Routes>
                 <Route element={<PublicRoute />}>
+                <Route path="/" element={<LandingPage />} />
                 <Route path="/login" element={<AuthForm />} />
                 <Route path="/signup" element={<AuthForm isSignup />} />
                 </Route>
               <Route element={<PrivateRoute />}>
-                <Route path="/update-profile" element={<ProfileWizard />} />
-                <Route path="/" element={<PostFeed />} />
+                <Route path="/update-profile" element={<ImprovedProfileWizard />} />
+                <Route path="/feed" element={<PostFeed />} />
                 <Route path="/bookmarks" element={<BookmarkList />} />
-                <Route path="/chat" element={<ChatRoom />} />
+                <Route path="/chat" element={<PrivateChatRoom />} />
                 <Route path="/analytics" element={<Analytics />} />
-                <Route path="/my-profile" element={<ProfilePage />} />
+                <Route path="/my-profile" element={<ImprovedProfilePage />} />
               </Route>
             </Routes>
           </div>

@@ -269,17 +269,6 @@ export const deletePost = createAsyncThunk('feed/deletePost', async (id: string,
   }
 });
 
-export const likePost = createAsyncThunk('feed/likePost', async (id: string, { dispatch }) => {
-  try {
-    const res = await axios.post(`/api/posts/${id}/like`, {}, {
-      headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
-    });
-    return { id, ...res.data };
-  } catch (err) {
-    dispatch(addNotification('Failed to like post'));
-    throw err;
-  }
-});
 
 export const addCommentOptimistic = createAsyncThunk(
   'feed/addComment',
@@ -396,13 +385,6 @@ const feedSlice = createSlice({
     
     builder.addCase(deletePost.fulfilled, (state, action) => {
       state.posts = state.posts.filter(p => p._id !== action.payload);
-    });
-    
-    builder.addCase(likePost.fulfilled, (state, action) => {
-      const post = state.posts.find(p => p._id === action.payload.id);
-      if (post) {
-        post.likes = action.payload.likes || [];
-      }
     });
   },
 });
